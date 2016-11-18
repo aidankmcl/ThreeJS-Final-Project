@@ -31,7 +31,7 @@ Aidan McLaughlin
   <body>
     <script type="text/javascript" id="helpers">
       // Material Setup
-      var roomMaterial = THREE.MeshPhongMaterial({color: 0xf7e0a2, shininess: 0});
+      var roomMaterial = new THREE.MeshPhongMaterial({color: 0xf7e0a2, shininess: 0});
       var lightMaterial = roomMaterial.clone();
       lightMaterial.side = THREE.FrontSide;
       var mattressMaterial = new THREE.MeshPhongMaterial({color: 0xf5e5c0});
@@ -115,6 +115,7 @@ Aidan McLaughlin
       function createRadio(params) {
         var radio = new THREE.Object3D();
 
+        // Create body of radio
         var bodyGeom = new THREE.BoxGeometry(params.radioWidth,
                                              params.radioHeight,
                                              params.radioLength);
@@ -122,6 +123,7 @@ Aidan McLaughlin
         body.position.setY(params.radioHeight/2);
         radio.add(body);
 
+        // Radio antenna
         var antennaGeom = new THREE.CylinderGeometry(params.radioAntRadius,
                                                      params.radioAntRadius,
                                                      params.radioAntLength);
@@ -133,33 +135,38 @@ Aidan McLaughlin
         antenna.rotation.z = -Math.PI/4;
         radio.add(antenna);
 
-        var grill = new THREE.Object3D();
-        var grillPieceVertGeom = new THREE.CylinderGeometry(params.radioWidth/60,
+        // Start speaker cover
+        // Places two sets of cylinders that are perpindicular to each other.
+        // The intersections create what look like the holes in a speaker cover.
+        var cover = new THREE.Object3D();
+        var coverPieceVertGeom = new THREE.CylinderGeometry(params.radioWidth/60,
                                                         params.radioWidth/60,
                                                         params.radioHeight);
-        var grillPieceVert = new THREE.Mesh(grillPieceVertGeom, blackMaterial);
+        var coverPieceVert = new THREE.Mesh(coverPieceVertGeom, blackMaterial);
         for (var i=0; i<params.radioWidth/2; i += params.radioWidth/25) {
-          var temp = grillPieceVert.clone()
+          var temp = coverPieceVert.clone()
           temp.position.setX(i);
-          grill.add(temp);
+          cover.add(temp);
         }
 
-        var grillPieceHorizGeom = new THREE.CylinderGeometry(params.radioWidth/60,
+        var coverPieceHorizGeom = new THREE.CylinderGeometry(params.radioWidth/60,
                                                         params.radioWidth/60,
                                                         params.radioWidth/2);
-        var grillPieceHoriz = new THREE.Mesh(grillPieceHorizGeom, blackMaterial);
-        grillPieceHoriz.rotation.z = -Math.PI/2;
-        grillPieceHoriz.position.setX(params.radioWidth/4);
+        var coverPieceHoriz = new THREE.Mesh(coverPieceHorizGeom, blackMaterial);
+        coverPieceHoriz.rotation.z = -Math.PI/2;
+        coverPieceHoriz.position.setX(params.radioWidth/4);
         for (var i=0; i<params.radioHeight; i += params.radioHeight/25) {
-          var temp = grillPieceHoriz.clone()
+          var temp = coverPieceHoriz.clone()
           temp.position.setY(i - params.radioHeight/2);
-          grill.add(temp);
+          cover.add(temp);
         }
-        grill.position.setX(-params.radioWidth/2);
-        grill.position.setY(params.radioHeight/2);
-        grill.position.setZ(params.radioLength/2);
-        radio.add(grill);
+        cover.position.setX(-params.radioWidth/2);
+        cover.position.setY(params.radioHeight/2);
+        cover.position.setZ(params.radioLength/2);
+        radio.add(cover);
+        // End speaker cover
 
+        // Tuner screen on front
         var tunerGeom = new THREE.BoxGeometry(params.radioWidth/3, params.radioHeight/6, 0.01);
         var tuner = new THREE.Mesh(tunerGeom, tunerMaterial);
         tuner.position.set(params.radioWidth/4,
@@ -167,6 +174,7 @@ Aidan McLaughlin
                            params.radioLength/2);
         radio.add(tuner);
 
+        // Front button
         var onButtonGeom = new THREE.CylinderGeometry(params.radioWidth/16, params.radioWidth/16, 0.05);
         var onButton = new THREE.Mesh(onButtonGeom, redMaterial);
         onButton.position.set(params.radioWidth/6,
@@ -440,7 +448,7 @@ Aidan McLaughlin
 
         radioWidth: 0.3,
         radioHeight: 0.2,
-        radioLength: 0.05,
+        radioLength: 0.1,
         radioAntLength: 0.25,
         radioAntRadius: 0.005,
         
@@ -461,7 +469,8 @@ Aidan McLaughlin
       
       var sceneNum = 0;
       function render() {
-        camera.position.z += 0.5 + (new Date().getTime() - counter) * 0.0005;
+        requestAnimationFrame(render);
+        camera.position.z += 0.3 + (new Date().getTime() - counter) * 0.0002;
         if (camera.position.z >= 1.5 * 256) {
           // sceneNum = (sceneNum + 1) % 2;
           // renderer.clear();
@@ -474,7 +483,6 @@ Aidan McLaughlin
         for (var i=0; i<scenes.length; i++) {
           renderer.render( scenes[i], camera );
         }
-        requestAnimationFrame(render);
       }
 
       var counter;

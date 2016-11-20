@@ -1,0 +1,197 @@
+<!--
+Aidan McLaughlin
+11/17/2016
+ -->
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Creative Scene!</title>
+    <style>
+      html, body {
+        margin: 0px;
+      }
+
+      h1 {
+        margin: 20px;
+      }
+
+      canvas {
+        display: block;
+        margin: auto;
+      }
+
+    </style>
+    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"></script>
+    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls.js"></script>
+    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa16.js"></script>
+    <script src="static/js/furniture.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script type="text/javascript" id="helpers">
+      function createScene(params, sceneNum) {
+        var newScene = new THREE.Object3D();
+        var Furniture = new aidanFurniture();
+        
+        newScene.add(Furniture.Room(params.roomWidth, params.roomHeight, params.roomLength));
+
+        var bed = Furniture.Bed(params.bedWidth, params.bedHeight, params.bedLength);
+        bed.position.setX(params.roomWidth/2 - params.bedWidth/2);
+        bed.position.setZ(-params.roomLength/2 + params.bedLength/2);
+        newScene.add(bed);
+
+        var table = Furniture.Table(params.tableWidth, params.tableHeight, params.tableLength);
+        table.position.setX(-params.roomWidth/2 + params.tableWidth/2 + 0.05);
+        table.position.setZ(params.roomLength/2 - params.tableLength/2 - 0.25);
+        newScene.add(table);
+
+        var radio = Furniture.Radio(params.radioWidth,
+                                    params.radioHeight,
+                                    params.radioLength,
+                                    params.radioAntRadius,
+                                    params.radioAntLength);
+        radio.position.set(-6*params.roomWidth/16, params.tableHeight + params.tableThickness, params.roomLength/4);
+        radio.rotation.y = 5 * Math.PI/8;
+        newScene.add(radio);
+
+        var fridge = Furniture.Fridge(params.fridgeWidth, params.fridgeHeight, params.fridgeLength);
+        fridge.position.setX(-params.roomWidth/2 + params.fridgeLength/2);
+        fridge.position.setZ(-params.roomLength/2 + params.fridgeWidth/2 + 0.1);
+        fridge.rotation.y = Math.PI / 2
+        newScene.add(fridge);
+
+        var chair = Furniture.Chair(params.chairWidth, params.chairHeight);
+        chair.rotation.y = -Math.PI/2;
+        chair.position.set(-params.roomWidth/2 + 3*params.tableWidth/4 + params.chairWidth,
+                         0,
+                         params.roomLength/2 - params.tableLength/2 - params.chairWidth/2);
+        newScene.add(chair);
+
+        newScene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+        return newScene;
+      }
+    </script>
+
+    <script type="text/javascript" id="main">
+      var canvas = createCanvas();
+      var scenes = [],
+          renderer,
+          camera;
+      
+      function createCanvas() {
+        var canvas = document.getElementById("canvas");
+        if (canvas) {
+          document.getElementById("canvas").remove();
+        }
+        canvas = document.createElement("canvas");
+        canvas.id = "canvas",
+        canvas.width = window.innerWidth - 5,
+        canvas.height = window.innerHeight
+        document.body.appendChild(canvas)
+        return canvas;
+      }
+
+      function sceneSetup(params, sceneNum) {
+        for (var i = 0.25; i<=256; i *= 4) {
+          var scene = new THREE.Scene();
+          var temp = createScene(params, sceneNum);
+          sceneNum = (sceneNum + 1) % 2;
+          temp.scale.set(i,i,i);
+          temp.position.setZ( i * params.roomLength/2.1);
+          temp.position.setY( i * -params.roomLength/2 );
+          scene.add(temp);
+          scenes.push(scene);
+        }
+        return scenes;
+      }
+
+      var Creative = function(params) {
+        // Create the renderer
+        renderer = new THREE.WebGLRenderer({
+          canvas: canvas
+        });
+        renderer.setSize(canvas.clientWidth,canvas.clientHeight);
+        renderer.setClearColor(0xffffff,1);
+
+        camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000 );
+        camera.position.set(0, 0, 1.5 * 64);
+
+        return {renderer: renderer, camera: camera}
+      }
+    </script>
+
+    <script type="text/javascript" id="launch">
+
+    /* params for the scene */
+      var params = {
+        roomWidth: 5,
+        roomHeight: 3,
+        roomLength: 3,
+        
+        bedWidth: 1.5,
+        bedHeight: 0.2,
+        bedLength: 2.5,
+        
+        tableWidth: 1.15,
+        tableHeight: 0.9,
+        tableLength: 1.5,
+        tableThickness: 0.08,
+        tableLegRadius: 0.03,
+
+        radioWidth: 0.3,
+        radioHeight: 0.2,
+        radioLength: 0.05,
+        radioAntLength: 0.25,
+        radioAntRadius: 0.005,
+        
+        fridgeWidth: 1,
+        fridgeHeight: 2.5,
+        fridgeLength: 0.7,
+
+        chairWidth: 0.5,
+        chairHeight: 1.5,
+      }
+
+      // For updating scenes in scroll
+      // function refreshScenes(params) {
+      //   return new Promise(function (resolve, reject) {
+      //     scenes = sceneSetup(params);
+      //     resolve(true);
+      //   });
+      // }
+      
+      // For updating scenes
+      var sceneNum = 0;
+
+      function render() {
+        requestAnimationFrame(render);
+        camera.position.z += 0.3 + (new Date().getTime() - counter) * 0.0002;
+        if (camera.position.z >= 1.5 * 256) {
+          // For updating scenes
+          // sceneNum = (sceneNum + 1) % 2;
+          // renderer.clear();
+          // refreshScenes(params).then(function(a) {console.log(a);});
+
+          camera.position.z = 1.5 * 64;
+          counter = new Date().getTime();
+        }
+
+        for (var i=0; i<scenes.length; i++) {
+          renderer.render( scenes[i], camera );
+        }
+      }
+
+      var counter;
+      /* Set up the renderer */
+      window.onload = function() {
+        var model = new Creative(params);
+        renderer.autoClear = false;
+        counter = new Date().getTime();
+        scenes = sceneSetup(params, sceneNum);
+        render();
+      }
+    </script>
+  </body>
+</html>

@@ -2,6 +2,7 @@
 Aidan McLaughlin
 Contribution to CS307
 Some furniture to use in scenes :)
+Using v80 of ThreeJS. http://cs.wellesley.edu/~cs307/threejs/lib/three-r80.js
 
 Usage:
 ```
@@ -79,7 +80,8 @@ var aidanFurniture = function() {
 aidanFurniture.prototype.Room = function(width, height, length) {
   /*
   Takes in a width, height and length. Returns an Object3D.
-  The center of the object is the center of the floor of the room.
+  The origin of the object is the center of the floor of the room.
+  The width moves along the x axis, the height along the y, the length on the z.
   */
 
   // Defaults
@@ -120,7 +122,8 @@ aidanFurniture.prototype.Room = function(width, height, length) {
 aidanFurniture.prototype.Bed = function(width, height, length) {
   /*
   Takes in a width, height and length. Returns an Object3D.
-  The center of the object is the center of the bottom of the frame.
+  The origin of the object is the center of the bottom of the frame.
+  The width moves along the x axis, the height along the y, the length on the z.
   */
 
   // Defaults
@@ -155,7 +158,9 @@ aidanFurniture.prototype.Radio = function(width, height, length, antennaRadius, 
   a radius and length for its antenna, if unchanged it may not look right with differently
   sized radios.
   Returns an Object3D.
-  The center of the object is the center of the bottom of the radio body.
+  The origin of the object is the center of the bottom of the radio body.
+  The width moves along the x axis, the height along the y, the length on the z.
+  The radio faces the positive z direction.
   */
 
   // Defaults
@@ -244,7 +249,7 @@ aidanFurniture.prototype.Table = function(width, height, length, thickness, legR
   The thickness is referring to the thickness of the top of the table, and you can additionally specify
   the radius of the legs. If the `bottomLegRadius` is not specified it is automatically the same as `legRadius`.
   Returns an Object3D.
-  The center of the object is the floor beneath the center of the tabletop.
+  The origin of the object is the floor beneath the center of the tabletop.
   */
 
   // Defaults
@@ -303,7 +308,9 @@ aidanFurniture.prototype.Fridge = function(width, height, length) {
   Takes in a width, height and length for the fridge. This includes the doors to the fridge
   but not the handles, which jut out roughly another fifth of the defined length.
   Returns an Object3D.
-  The center of the object is the center of the bottom of the fridge (including doors);
+  The origin of the object is the center of the bottom of the fridge (including doors);
+  The width moves along the x axis, the height along the y, the length on the z.
+  The fridge faces the positive z direction.
   */
 
   // Defaults
@@ -376,7 +383,9 @@ aidanFurniture.prototype.Chair = function(width, height) {
   to both sides and the back of the chair adds 1/40th of the width to the rear 
   of the object.
   Returns an Object3D
-  The center of the object is on the floor directly beneath the center of the seat cube.
+  The origin of the object is on the floor directly beneath the center of the seat cube.
+  The width moves along the x axis, the height along the y.
+  The chair faces the positive z direction.
   */
 
   // Defaults

@@ -30,9 +30,10 @@ Aidan McLaughlin
   </head>
   <body>
     <script type="text/javascript" id="helpers">
+      var Furniture = new aidanFurniture();
+
       function createScene(params, sceneNum) {
         var newScene = new THREE.Object3D();
-        var Furniture = new aidanFurniture();
         
         newScene.add(Furniture.Room(params.roomWidth, params.roomHeight, params.roomLength));
 
@@ -93,14 +94,16 @@ Aidan McLaughlin
         return canvas;
       }
 
-      function sceneSetup(params, sceneNum) {
+      function sceneSetup(params) {
         for (var i = 0.25; i<=256; i *= 4) {
           var scene = new THREE.Scene();
-          var temp = createScene(params, sceneNum);
-          sceneNum = (sceneNum + 1) % 2;
+          var temp = createScene(params);
+
           temp.scale.set(i,i,i);
           temp.position.setZ( i * params.roomLength/2.1);
           temp.position.setY( i * -params.roomLength/2 );
+          temp.rotation.y = params.playerRotation;
+
           scene.add(temp);
           scenes.push(scene);
         }
@@ -112,8 +115,10 @@ Aidan McLaughlin
         renderer = new THREE.WebGLRenderer({
           canvas: canvas
         });
+        
         renderer.setSize(canvas.clientWidth,canvas.clientHeight);
-        renderer.setClearColor(0xffffff,1);
+        renderer.setClearColor(0xffffff, 1);
+        renderer.autoClear = false;
 
         camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000 );
         camera.position.set(0, 0, 1.5 * 64);
@@ -123,8 +128,7 @@ Aidan McLaughlin
     </script>
 
     <script type="text/javascript" id="launch">
-
-    /* params for the scene */
+      /* params for the scene */
       var params = {
         roomWidth: 5,
         roomHeight: 3,
@@ -152,15 +156,9 @@ Aidan McLaughlin
 
         chairWidth: 0.5,
         chairHeight: 1.5,
-      }
 
-      // For updating scenes in scroll
-      // function refreshScenes(params) {
-      //   return new Promise(function (resolve, reject) {
-      //     scenes = sceneSetup(params);
-      //     resolve(true);
-      //   });
-      // }
+        playerRotation: 0,
+      }
       
       // For updating scenes
       var sceneNum = 0;
@@ -168,12 +166,8 @@ Aidan McLaughlin
       function render() {
         requestAnimationFrame(render);
         camera.position.z += 0.3 + (new Date().getTime() - counter) * 0.0002;
+        
         if (camera.position.z >= 1.5 * 256) {
-          // For updating scenes
-          // sceneNum = (sceneNum + 1) % 2;
-          // renderer.clear();
-          // refreshScenes(params).then(function(a) {console.log(a);});
-
           camera.position.z = 1.5 * 64;
           counter = new Date().getTime();
         }
@@ -187,11 +181,32 @@ Aidan McLaughlin
       /* Set up the renderer */
       window.onload = function() {
         var model = new Creative(params);
-        renderer.autoClear = false;
+
         counter = new Date().getTime();
         scenes = sceneSetup(params, sceneNum);
         render();
       }
+    </script>
+
+    <script type="text/javascript">
+      document.addEventListener('keydown', function(event) {
+        const keyName = event.key;
+        var update = false;
+
+        switch (keyName) {
+          case 'a':
+            params.playerRotation += Math.PI/90;
+            update = true;
+          case 'd':
+            params.playerRotation -= Math.PI/90;
+            update = true;
+            break;
+        }
+
+        if (update) {
+          scenes = sceneSetup(params);
+        }
+      })
     </script>
   </body>
 </html>

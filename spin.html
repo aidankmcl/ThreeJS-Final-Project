@@ -140,15 +140,6 @@ Aidan McLaughlin
 
         return {renderer: renderer, camera: camera}
       }
-
-      function applySceneChange(miniScene) {
-        if (params.playerRight) {
-          miniScene.rotation.y += Math.PI/128;
-        }
-        if (params.playerLeft) {
-          miniScene.rotation.y -= Math.PI/128;
-        }
-      }
     </script>
 
     <script type="text/javascript" id="launch">
@@ -193,7 +184,7 @@ Aidan McLaughlin
         camera.position.z += 0.3 + (new Date().getTime() - counter) * 0.0002;
 
         for (var i=0; i<scene.children.length; i++) {
-          applySceneChange(scene.children[i]);
+          scene.children[i].rotation.y += Math.PI/512;
         }
         
         if (camera.position.z >= 1.5 * 256) {
@@ -211,6 +202,7 @@ Aidan McLaughlin
 
         counter = new Date().getTime();
         scene = sceneSetup(params, sceneNum);
+        console.log(scene);
         render();
       }
     </script>
@@ -218,29 +210,22 @@ Aidan McLaughlin
     <script type="text/javascript">
       document.addEventListener('keydown', function(event) {
         const keyName = event.key;
+        var update = false;
 
         switch (keyName) {
           case 'a':
-            params.playerLeft = true;
-            break;
+            params.playerRotation += Math.PI/8;
+            update = true;
           case 'd':
-            params.playerRight = true;
+            params.playerRotation -= Math.PI/8;
+            update = true;
             break;
         }
-      });
 
-      document.addEventListener('keyup', function(event) {
-        const keyName = event.key;
-
-        switch (keyName) {
-          case 'a':
-            params.playerLeft = false;
-            break;
-          case 'd':
-            params.playerRight = false;
-            break;
+        if (update) {
+          scene = sceneSetup(params);
         }
-      });
+      })
     </script>
   </body>
 </html>

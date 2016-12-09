@@ -40,6 +40,7 @@ var aidanFurniture = function() {
   // Material Setup
   // Used in Room
   this.roomMaterial = new THREE.MeshPhongMaterial({color: 0xf7e0a2, shininess: 0});
+  this.roomMaterial.transparent = false;
   this.lightMaterial = this.roomMaterial.clone();
   this.lightMaterial.side = THREE.FrontSide;
 
@@ -77,7 +78,7 @@ var aidanFurniture = function() {
   this.handleMaterial = this.fridgeMaterial.clone();
 }
 
-aidanFurniture.prototype.Room = function(width, height, length) {
+aidanFurniture.prototype.Room = function(width, height, length, roomNum) {
   /*
   Takes in a width, height and length. Returns an Object3D.
   The origin of the object is the center of the floor of the room.
@@ -97,11 +98,9 @@ aidanFurniture.prototype.Room = function(width, height, length) {
   roomWalls.position.setY(height/2);
   room.add(roomWalls);
 
-  var topLight = new THREE.PointLight( 0xffffff, 0.6);
-  topLight.position.setY(height/2);
-  room.add(topLight);
 
   var ceilingLight = new THREE.Object3D();
+  
   var lightCoverGeom = new THREE.CylinderGeometry(width/20,
                                                   width/20,
                                                   height/30,

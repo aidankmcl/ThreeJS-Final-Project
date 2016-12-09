@@ -63,7 +63,9 @@ Aidan McLaughlin
                                     params.radioAntRadius,
                                     params.radioAntLength);
         radio.layers.set(roomNum);
-        radio.position.set(-6*params.roomWidth/16, params.tableHeight + params.tableThickness, params.roomLength/4);
+        radio.position.set(-6*params.roomWidth/16,
+                           params.tableHeight,
+                           params.roomLength/4);
         radio.rotation.y = 5 * Math.PI/8;
         newScene.add(radio);
 
@@ -111,8 +113,6 @@ Aidan McLaughlin
         for (var i=0.25, j=0; i<=256; i *= 4, j++) {
           var temp = createScene(params, j);
 
-          // camera.layers.enable(j);
-
           temp.scale.set(i,i,i);
           temp.position.setZ( i * params.roomLength/3);
           temp.position.setY( i * -params.roomLength/2 );
@@ -135,19 +135,12 @@ Aidan McLaughlin
         renderer.setClearColor(0xffffff, 1);
         renderer.autoClear = false;
 
-        camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000 );
-        camera.position.set(0, 0, 1.5 * 64);
+        camera = new THREE.PerspectiveCamera(75, 
+                                             canvas.clientWidth / canvas.clientHeight, 
+                                             0.1, 
+                                             2000);
 
         return {renderer: renderer, camera: camera}
-      }
-
-      function applySceneChange(miniScene) {
-        if (params.playerRight) {
-          miniScene.rotation.y += Math.PI/128;
-        }
-        if (params.playerLeft) {
-          miniScene.rotation.y -= Math.PI/128;
-        }
       }
     </script>
 
@@ -184,33 +177,101 @@ Aidan McLaughlin
 
         playerRotation: 0,
       }
+
+      function applySceneChange(miniScene) {
+        if (params.playerRight) {
+          miniScene.rotation.y += Math.PI/128;
+        }
+        if (params.playerLeft) {
+          miniScene.rotation.y -= Math.PI/128;
+        }
+      }
+
+      function calculateCameraPath() {
+        var outDirection = startPoint.clone()
+          .add(startPoint.clone().multiplyScalar(3));
+        var inDirection = endPoint.clone()
+          .sub(endPoint.clone().divideScalar(2));
+        var final = endPoint.clone()
+          .add(endPoint.clone().sub(inDirection).normalize().multiplyScalar(2));
+
+        return new THREE.CubicBezierCurve3(startPoint,
+                                           outDirection,
+                                           inDirection,
+                                           final);
+      }
       
       // For updating scenes
       var sceneNum = 0;
+      var pathTime = 5000;
+      var cameraPath;
 
       function render() {
         requestAnimationFrame(render);
-        camera.position.z += 0.3 + (new Date().getTime() - counter) * 0.0002;
+        // camera.position.z += 0.4 + (new Date().getTime() - counter) * 0.0002;
+        var point = (new Date().getTime() - counter)/pathTime;
 
-        for (var i=0; i<scene.children.length; i++) {
+        camera.position.copy(cameraPath.getPointAt(point));
+        camera.lookAt(cameraPath.getPointAt(point - 0.01));
+
+        for (var i=0; i<scene.children.length - 2; i++) {
           applySceneChange(scene.children[i]);
         }
         
-        if (camera.position.z >= 1.5 * 256) {
-          camera.position.z = 1.5 * 64;
+        if (camera.position.distanceTo(endPoint) <= 1) {
+          console.log('updating');
+          var startScene = scene.children[4];
+          startPoint = getFrontPoint(startScene, params);
+
+          var endScene = scene.children[5];
+          endPoint = getFrontPoint(endScene, params);
+
           counter = new Date().getTime();
+          cameraPath = calculateCameraPath();
+        } else {
+          console.log(camera.position.distanceTo(endPoint));
         }
 
         renderer.render( scene, camera );
       }
 
+      function getFrontPoint(tempScene, params) {
+        var sphere = new THREE.SphereGeometry(0.01, 32, 32);
+        var material = new THREE.MeshBasicMaterial( {color: 0xb05ecc} );
+        var frontPoint = new THREE.Mesh( sphere, material );
+
+        frontPoint.position.setY( params.roomHeight/2 );
+        frontPoint.position.setZ( params.roomLength/2 );
+
+        tempScene.add(frontPoint);
+
+        frontPoint.visible = false;
+
+        tempScene.updateMatrixWorld();
+        var pos = new THREE.Vector3();
+
+        return pos.setFromMatrixPosition(frontPoint.matrixWorld);
+      }
+
       var counter;
+      var startScene, startPoint;
+      var endScene, endPoint;
       /* Set up the renderer */
       window.onload = function() {
         var model = new Creative(params);
 
         counter = new Date().getTime();
         scene = sceneSetup(params, sceneNum);
+
+        startScene = scene.children[4];
+        startPoint = getFrontPoint(startScene, params);
+
+        endScene = scene.children[5];
+        endPoint = getFrontPoint(endScene, params);
+        
+        camera.position.copy(startPoint);
+        cameraPath = calculateCameraPath();
+
         render();
       }
     </script>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Room Animation</title>
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css">
+	<script src="https://cs.wellesley.edu/~cs307/threejs/libs/three-r80.min.js"></script>
+    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/OrbitControls.js"></script>
+    <script src="https://cs.wellesley.edu/~cs307/threejs/libs/tw-fa16.js"></script>
+	<script type="text/javascript" src="static/js/furniture.js"></script>
+</head>
+<body>
+	<style type="text/css">
+		h1, p {
+			margin: 25px 0px;
+		}
+			p {
+				font-size: 18px;
+			}
+		.video-holder {
+			background: black;
+		}
+
+		.image-holder {
+			width: 100%;
+			text-align: center;
+		}
+			.image-holder img {
+				display: inline-block;
+				border-radius: 3px;
+			}
+	</style>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-10 col-sm-offset-1 col-xs-12">
+				<h1>Room Animation</h1>
+				<p>For my final project in Computer Graphics at Wellesley College, I wanted to recreate a concept found in Rebecca Sugar's animation, <a href="https://www.youtube.com/watch?v=Tgue81LVZ4E">Singles</a>. The video is embedded below:</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="video-holder">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2">
+					<iframe width="100%" height="390" src="https://www.youtube.com/embed/Tgue81LVZ4E" frameborder="0" allowfullscreen></iframe>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-10 col-sm-offset-1 col-xs-12">
+				<h2>Inspiration</h2>
+				<p>The piece that I wanted to emulate in particular was the recursive nature of the main character's being. Each action within the apartment is committed to an endless number of verions both encompassing and encompassed by the character. Here's an image that highlights the effect.</p>
+				
+				<div class="image-holder">
+					<img width="100%" alt="Main character entering apartment" src="static/images/singles.png">
+				</div>
+
+				<h2>Illusion of Infinity</h2>
+				<p>So I first started out with creating the room, then I copied it and scaled each clone to different proportions, all within one another. Finally I had a center-facing camera move away from center at a velocity that grows slightly over time. The camera needed to accelerate because of the scaling: a speed that looks nice for one scale was generally far too slow when the larger room around it came into view. Once the camera reached the same relative perspective it had started with in the smaller scene, it jumps back to the original position - creating the effect of continuously scooting backwards.</p>
+
+				<div class="image-holder">
+					<img width="100%" alt="Vanilla shot of scene" src="static/images/normal.png">
+				</div>
+
+				<h2>Camera Movement</h2>
+				<p>At this point, the next big step is to make the inside box move around like a person. The first challenge associated with that was camera. I wanted the animation to smoothly account for changes in rotation and position of the scene within by always exiting the center of the front wall. Below, you can see the beginnings of this process where I placed a sphere at this point. The dots you see are the 'front and center's of each scene.</p>
+
+				<div class="image-holder">
+					<img width="100%" alt="Vanilla shot of scene" src="static/images/process.png">
+				</div>
+
+				<p>In the end, the only two points I need are those of the "inner scene" and "outer scene." I define these as "the scene the camera starts in" and "the scene that surrounds the inner scene," respectively. I handled the scene changes by applying them to all but the outer scene (since we shouldn't be noticing the relative changes from "within the chest" of the character).</p>
+
+				<p>Finally, the camera path needed to be regularly adjusted. Each time it reached the edge of the outer scene, a bezier curve was calculated between the purple point of the inner scene and a purple point of the outer scene, maintining paths that started and ended perpendicular to the front face of each scene. Each camera position is then calculated by asking our bezier curve for a point at given times. Given a user-defined interval for the camera movement, a counter can be used to determine how far along the path our camera should be. With this information we can place the camera along the bezier curve and for good measure always have it look at the point just before it (for more dynamic* camera movement).</p>
+
+				<p>*By dynamic I mean it's quite a bit of motion and I'd warn anybody who easily gets motion sick not to rotate the character in the demo too much.</p>
+
+				<p>Controls:</p>
+				<pre><code>W: Move forward
+A: Turn left
+S: Move backward
+D: Turn right
+Q: Move down
+E: Move up</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<canvas id="canvas"></canvas>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-10 col-sm-offset-1 col-xs-12">
+				<h2>Future Work</h2>
+				<p>Right now the camera movement isn't terribly smooth and is probably the highest priority issue. Otherwise I'd like to add player actions. Please contact me if you have any suggestions! <a href="mailto:aidankmcl@gmail.com">aidankmcl@gmail.com</a></p>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="static/js/scene.js"></script>
+</body>
+</html>
